@@ -1,14 +1,14 @@
-def read_file(inFileName):
-    listOfCourses = []
-    with open(inFileName) as file:
+def read_file(source_file):
+    list_of_tuples = []
+    with open(source_file) as file:
         for line in file.readlines():
             line = line.strip().split(',')
-            listOfCourses.append(line)
-    return listOfCourses
+            list_of_tuples.append(line)
+    return list_of_tuples
 
 
-def write_file(data, outFileName):
-    with open(outFileName, "w") as file:
+def write_file(data, destination_file):
+    with open(destination_file, "w") as file:
         for line in data:
             file.write(','.join(line) + '\n')
 
@@ -33,15 +33,15 @@ def print_course_details(course):
                                                                           str(int(course[-2]) - int(course[-1]))))
 
 
-def print_courses_info(inFileName):
-    data = read_file(inFileName)
+def print_courses_info(source_file):
+    data = read_file(source_file)
     print_headers()
     for course in data:
         print_course_details(course)
 
 
-def search_course(inFileName):
-    data = read_file(inFileName)
+def search_course(source_file):
+    data = read_file(source_file)
     choice = input('1. Search by name\n2. Search by course code\n3. Search by course number\nEnter choice: ')
     if choice not in ['1', '2', '3']:
         print("Invalid choice.")
@@ -62,10 +62,10 @@ def search_course(inFileName):
                 found = True
                 print_course_details(course)
     else:
-        courseNumber = input("Enter course number: ").lower()
+        course_number = input("Enter course number: ").lower()
         print_headers()
         for course in data:
-            if courseNumber == course[0].lower():
+            if course_number == course[0].lower():
                 found = True
                 print_course_details(course)
 
@@ -73,149 +73,163 @@ def search_course(inFileName):
         print("No course found.")
 
 
-def add_courses(inFileName):
-    data = read_file(inFileName)
-    courseNumbers = [course[0] for course in data]
+def add_courses(source_file):
+    data = read_file(source_file)
+    course_numbers = [course[0] for course in data]
     course = []
-    courseNumber = input("Enter course number: ")
-    if (not courseNumber.isnumeric()) or (len(courseNumber) != 5) or (courseNumber in courseNumbers):
-        print("Invalid input.")
+    course_number = input("Enter course number: ")
+    if course_number in course_numbers:
+        print("Serial Number already exists")
+
+    if not course_number.isnumeric() or len(course_number) != 5:
+        print("The course number isn't an integer, or it's not 5 digits")
         return
-    course.append(courseNumber)
-    courseCode = input("Enter course code: ")
-    if len(courseCode) == 0:
-        print("Invalid input.")
+
+    course_code = input("Enter course code: ")
+    if len(course_code) == 0:
+        print("The course code cannot be empty.")
         return
-    course.append(courseCode)
+
     section = input("Enter section number: ")
     if int(section) < 1:
-        print("Invalid input.")
+        print("Section number must be positive and non-empty")
         return
-    course.append(section)
-    courseName = input("Enter course name: ")
-    if len(courseName) == 0:
-        print("Invalid input.")
+
+    course_name = input("Enter course name: ")
+    if len(course_name) == 0:
+        print("Course name cannot be empty.")
         return
-    course.append(courseName)
+
     instructor = input("Enter instructor name: ")
     if len(instructor) == 0:
-        print("Invalid input.")
+        print("Instructor name cannot be empty.")
         return
-    course.append(instructor)
-    size = str(input("Enter section size: "))
+
+    size = input("Enter section size: ")
     if int(size) < 1:
-        print("Invalid input.")
+        print("Section size must be positive and non-empty")
         return
-    course.append(size)
-    course.append('0')
+
+
+    course.extend([course_number,course_code,section,course_name, instructor,size,'0'])
     data.append(course)
-    write_file(data, inFileName)
-    print("Course added.")
+    write_file(data, source_file)
+    print("Course has been added successfully!")
 
 
-def remove_courses(inFileName):
-    data = read_file(inFileName)
-    courseNumbers = [course[0] for course in data]
+def remove_courses(source_file):
+    data = read_file(source_file)
+    course_numbers = [course[0] for course in data]
+
     while True:
-        courseNumber = input("Enter course number: ")
-        if not (courseNumber in courseNumbers):
-            print("Invalid input.")
-        else:
+        course_number = input("Enter course number: ")
+
+        if course_number in course_numbers:
             break
+        else:
+            print("Course does not exist")
+
     print_headers()
     for i, course in enumerate(data):
-        if courseNumber == course[0]:
+        if course_number == course[0]:
             print_course_details(course)
-            if 'y' == input("Enter 'y' to confirm removing: ").lower():
+            if 'y' == input(f"Do you want to remove the course ({course_number})? [Y/N] ").lower():
                 if int(course[-1]) == 0:
                     data.pop(i)
-                    write_file(data, inFileName)
+                    write_file(data, source_file)
+                    print("Course has been removed successfully")
                 else:
                     print("Can't remove course, since students have enrolled in it.")
 
 
-def update_courses(inFileName):
-    data = read_file(inFileName)
-    courseNumbers = [course[0] for course in data]
+def update_courses(source_file):
+    data = read_file(source_file)
+    course_numbers = [course[0] for course in data]
     while True:
-        courseNumber = input("Enter course number: ")
-        if not (courseNumber in courseNumbers):
-            print("Invalid input.")
-        else:
+        course_number = input("Enter course number: ")
+        if course_number in course_numbers:
             break
+        else:
+            print("Course does not exist")
+
     choice = input('1. Update course name\n2. Update instructor name\n3. Update section size\nEnter choice: ')
+
     if choice not in ['1', '2', '3']:
         print("Invalid choice.")
         return
     if choice == '1':
         name = input("Enter name: ")
         for course in data:
-            if courseNumber == course[0]:
+            if course_number == course[0]:
                 course[3] = name
                 print("Course name changed.")
                 break
     elif choice == '2':
         instructor = input("Enter instructor name: ")
         for course in data:
-            if courseNumber == course[0]:
+            if course_number == course[0]:
                 course[-3] = instructor
                 print("Instructor name changed.")
                 break
     else:
         size = int(input("Enter section size: "))
         for course in data:
-            if courseNumber == course[0]:
+            if course_number == course[0]:
                 course[-2] = size
                 print("Section size changed.")
                 break
-    write_file(data, inFileName)
+    write_file(data, source_file)
 
 
-def register_student(inFileName, outFileName):
-    data = read_file(inFileName)
-    courseNumbers = [course[0] for course in data]
+def register_student(source_file, destination_file):
+    data = read_file(source_file)
+    course_numbers = [course[0] for course in data]
     while True:
-        courseNumber = input("Enter course number: ")
-        if not (courseNumber in courseNumbers):
-            print("Invalid input.")
-        else:
+        course_number = input("Enter course number: ")
+        if course_number in course_numbers:
             break
-    studentID = input("Enter student ID: ")
-    studentName = input("Enter student name: ")
+        else:
+            print("Course number doesn't exist")
+
+    student_id = input("Enter student ID: ")
+    student_name = input("Enter student name: ")
+
     for course in data:
-        if courseNumber == course[0]:
+        if course_number == course[0]:
             if int(course[-1]) == int(course[-2]):
                 print("Course is full.")
                 return
             course[-1] = str(int(course[-1]) + 1)
-    write_file(data, inFileName)
+    write_file(data, source_file)
     try:
-        studentsDetails = read_file(outFileName)
-        studentsDetails.append([str(courseNumber), studentName, str(studentID)])
+        students_details = read_file(destination_file)
+        students_details.append([str(course_number), student_name, str(student_id)])
     except:
-        studentsDetails = [[str(courseNumber), studentName, str(studentID)]]
-    write_file(studentsDetails, outFileName)
+        students_details = [[str(course_number), student_name, str(student_id)]]
+    write_file(students_details, destination_file)
     print("Student registered.")
 
 
-def drop_student(inFileName, outFileName):
-    studentsDetails = read_file(outFileName)
-    courseNumber = input("Enter course number: ")
-    studentID = input("Enter student ID: ")
+def drop_student(source_file, destination_file):
+    students_details = read_file(destination_file)
+    course_number = input("Enter course number: ")
+    student_id = input("Enter student ID: ")
     found = False
-    for i, student in enumerate(studentsDetails):
-        if studentID == student[-1] and courseNumber == student[0]:
+    for i, student in enumerate(students_details):
+        if student_id == student[-1] and course_number == student[0]:
             found = True
-            print(student)
-            if 'y' == input("Enter 'y' to confirm removing: ").lower():
-                studentsDetails.pop(i)
-                data = read_file(inFileName)
+            if 'y' == input(f'Enter "y" to confirm removing the student ({student[1]}) from the course ({course_number}): ').lower():
+                students_details.pop(i)
+                data = read_file(source_file)
+                course_name = ""
                 for course in data:
-                    if courseNumber == course[0]:
+                    if course_number == course[0]:
+                        course_name = course[3]
                         course[-1] = str(int(course[-1]) - 1)
                         break
-                write_file(data, inFileName)
-                write_file(studentsDetails, outFileName)
+                write_file(data, source_file)
+                write_file(students_details, destination_file)
+                print(f"Student {student_id}, {student[1]} has been dropped from {course_name} successfully")
     if not found:
         print("No student found.")
 
@@ -229,33 +243,31 @@ def main():
             \n6. Register a student in a course\
             \n7. Drop a student from a course\
             \n8. Exit'
-    print("University Registrar System")
+
+    source_file = "coursesInfo.txt"
+    destination_file = "registeredStudents.txt"
+
     while True:
-        inFileName = "coursesInfo.txt"
-        outFileName = "registeredStudents.txt"
+        print("University Registrar System")
         print("=" * 40)
         print(menu)
         print("=" * 40)
-        while True:
-            choice = input("Enter your choice: ")
-            if choice not in ['1', '2', '3', '4', '5', '6', '7', '8']:
-                print("Invalid choice. Try again.")
-            else:
-                break
+        choice = input("Enter your choice: ")
+
         if choice == '1':
-            print_courses_info(inFileName)
+            print_courses_info(source_file)
         elif choice == '2':
-            search_course(inFileName)
+            search_course(source_file)
         elif choice == '3':
-            add_courses(inFileName)
+            add_courses(source_file)
         elif choice == '4':
-            remove_courses(inFileName)
+            remove_courses(source_file)
         elif choice == '5':
-            update_courses(inFileName)
+            update_courses(source_file)
         elif choice == '6':
-            register_student(inFileName, outFileName)
+            register_student(source_file, destination_file)
         elif choice == '7':
-            drop_student(inFileName, outFileName)
+            drop_student(source_file, destination_file)
         else:
             print("GoodBye!")
             break
