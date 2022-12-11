@@ -1,0 +1,4 @@
+13068,ICS104,55,Introduction to Programming in Python and C,Saleh AlSaleh,30,1
+13080,ICS104,68,Introduction to Programming in Python and C,Saleh AlSaleh,30,0
+14292,ICS104,69,Introduction to Programming in Python and C,Saleh AlSaleh,30,0
+14293,ICS104,70,Introduction to Programming in Python and C,Saleh AlSaleh,30,0
